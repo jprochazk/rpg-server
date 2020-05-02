@@ -1,12 +1,9 @@
 # Binaries
-**/bin/
-
-# The repository bundles the premake executable
-!vendor/bin/premake/
+build
 
 # conan
 conan.lock
-conanbuildinfo.*
+conanbuildinfo*
 conaninfo.txt
 graph_info.json
 

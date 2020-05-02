@@ -14,11 +14,11 @@ elseif(DEFINED MSVC)
     add_compile_options(/bigobj)
 endif()
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include(conanbuildinfo_multi.cmake)
 conan_basic_setup()
 
 add_executable(server src/main.cpp)
-target_link_libraries(server ${CONAN_LIBS})
+conan_target_link_libraries(server)
 
 target_precompile_headers(server PRIVATE src/pch.h)
 include_directories(${CMAKE_SOURCE_DIR}/src)
