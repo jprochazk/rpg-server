@@ -11,6 +11,7 @@
 #endif
 
 #include <iostream>
+#include <fstream>
 #include <utility>
 #include <type_traits>
 #include <limits>
@@ -38,6 +39,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
 #include <spdlog/spdlog.h>

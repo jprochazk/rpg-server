@@ -1,8 +1,11 @@
 
 #include "pch.h"
-#include "network/net.h"
-#include "network/SocketListener.h"
+#include "core/network/net.h"
+#include "core/network/SocketListener.h"
 #include "world/World.h"
+#include "core/Config.h"
+
+#include <pqxx/pqxx>
 
 std::atomic<bool> exitSignal = false;
 void SignalHandler(boost::system::error_code const& error, int signalNum) 
@@ -15,44 +18,42 @@ void SignalHandler(boost::system::error_code const& error, int signalNum)
 	exitSignal.store(true, std::memory_order_release);
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-	if(argc > 3) {
-		std::cout 	<< "\n"
-					<< "Usage: " << argv[0] << " <address> [port]\n"
-					<< "\n"
-					<< "address\t - server address, default is 127.0.0.1\n"
-					<< "port\t - optional server port, default is 8001\n"
-					<< std::endl;
+	Config::Load("config.json");
 
-		return 0;
-	}
-	
-	std::string address_str;
-	net::ip::address address;
-	if(argc > 1) {
-		address_str = argv[1];
-		try {
-			address = net::ip::make_address(address_str);
-		} catch(...) {
-			std::cerr << "Invalid address \"" << argv[1] << "\"" << std::endl;
-			return EXIT_FAILURE;
-		}
-	}
-	
-	uint16_t port;
-	if(argc > 2) {
-		try {
-			port = static_cast<uint16_t>(std::atoi(argv[2]));
-		} catch(...) {
-			std::cerr << "Invalid port \"" << argv[2] << "\"" << std::endl;
-			return EXIT_FAILURE;
-		}
-	} else {
-		port = 8001U;
-	}
+	auto address_str = Config::GetOrDefault<std::string>("ip", "127.0.0.1");
+	auto port = Config::GetOrDefault<uint16_t>("port", 8001);
 
 	spdlog::info("Starting server at {}:{}", address_str, port);
+
+	{
+		auto options = Config::GetOrThrow<json>("database");
+		auto user = options["user"].get<std::string>();
+		auto password = options["password"].get<std::string>();
+		auto host = options["host"].get<std::string>();
+		auto port = options["port"].get<uint16_t>();
+		auto name = options["name"].get<std::string>();
+		spdlog::info("Connecting to database postgresql://{}:{}@{}:{}/{}",
+			user, password, host, port, name);
+
+		try {
+			pqxx::connection conn(fmt::format("postgresql://{}:{}@{}:{}/{}",
+				user, password, host, port, name));
+
+			pqxx::work work(conn);
+			auto result = work.exec1("SELECT 1");
+			work.commit();
+
+
+			spdlog::info("Result: {}", result[0].as<int>());
+		}
+		catch (const std::exception& e) {
+			spdlog::error("{}", e.what());
+			exit(EXIT_FAILURE);
+		}
+
+	}
 
 	// instantiate world singleton
 	World::Instance();
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
 		// Create and launch a listening port
 		std::make_shared<SocketListener>(
 			ioc,
-			tcp::endpoint{ address, port },
+			tcp::endpoint{ net::ip::make_address(address_str), port },
 			World::Instance()->GetSocketManager()
 		)->Run();
 
