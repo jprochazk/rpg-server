@@ -3,6 +3,7 @@
 #ifndef SERVER_WORLD_OPCODE_H
 #define SERVER_WORLD_OPCODE_H
 
+
 enum Opcode : uint16_t {
     STEST = 0,
     CTEST = 1,
@@ -10,21 +11,52 @@ enum Opcode : uint16_t {
 };
 constexpr size_t NUM_OPCODES = Opcode::MAX;
 
-const char* OpcodeToString(uint16_t opcode);
-bool IsClientOpcode(uint16_t opcode);
+namespace OpcodeUtils {
+
+constexpr char* ToString(uint16_t opcode) {
+    switch (opcode) {
+        case Opcode::STEST: return "STEST";
+        case Opcode::CTEST: return "CTEST";
+        default: return "MAX";
+    }
+}
+
+constexpr bool IsClient(uint16_t opcode) {
+    switch (opcode) {
+        case Opcode::CTEST: return true;
+        default: return false;
+    }
+}
+
+};
 
 class WorldSession;
 class WorldPacket;
 
-typedef bool (*OpcodeHandler)(WorldSession*,WorldPacket&);
+namespace HANDLERS {
 
-bool HandleOpcode_Test(WorldSession* session, WorldPacket& packet);
+#define DECLARE(name) bool name##(WorldSession* session, WorldPacket& packet)
 
+DECLARE(Test);
+
+#undef DECLARE
+
+}; // namespace HANDLERS
+
+
+#define HANDLER_REF(name) &HANDLERS::##name
+#define NOOP_REF nullptr
+
+
+typedef bool (*OpcodeHandler)(WorldSession*, WorldPacket&);
 static const OpcodeHandler OPCODE_TABLE[NUM_OPCODES] = {
-    /* STEST(0) = */ nullptr,
-    /* CTEST(1) = */ &HandleOpcode_Test,
+    /* STEST(0) = */ NOOP_REF,
+    /* CTEST(1) = */ HANDLER_REF(Test),
     // we don't store MAX because we check against it when validating the packet
 };
+
+#undef HANDLER_REF
+#undef NOOP_REF
 
 
 #endif // SERVER_WORLD_OPCODE_H

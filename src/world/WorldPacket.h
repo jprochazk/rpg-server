@@ -3,9 +3,9 @@
 #define SERVER_WORLD_WORLD_PACKET_H
 
 #include "pch.h"
-#include "world/Opcode.h"
 #include "core/common/ByteBuffer.h"
 #include "world/WorldTime.h"
+#include "Opcode.h"
 
 class WorldPacket : public ByteBuffer {
 public:
@@ -16,7 +16,7 @@ public:
     static constexpr size_t MAX_PACKET_SIZE = 1024;
 
     bool IsValid() const noexcept;
-    Opcode GetOpcode() const noexcept;
+    uint16_t GetOpcode() const noexcept;
     uint32_t GetTime() const noexcept;
 private:
     uint16_t opcode_;

@@ -2,8 +2,8 @@
 #include "pch.h"
 #include "World.h"
 #include "core/network/Websocket.h"
-#include "world/WorldPacket.h"
-#include "world/Opcode.h"
+#include "WorldPacket.h"
+#include "Opcode.h"
 
 World::World()
     : socketManager_()
@@ -40,10 +40,10 @@ World::~World()
 {
 }
 
-World* World::Instance()
+World& World::Instance()
 {
     static World instance;
-    return &instance;
+    return instance;
 }
 
 WorldSocketManager* World::GetSocketManager()

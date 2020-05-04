@@ -1,37 +1,24 @@
 
 #include "pch.h"
-#include "world/Opcode.h"
-#include "world/WorldSession.h"
-#include "world/WorldPacket.h"
+#include "Opcode.h"
+#include "WorldSession.h"
+#include "WorldPacket.h"
 
-const char* OpcodeToString(uint16_t opcode) {
-    switch(opcode) {
-        case Opcode::STEST: return "STEST";
-        case Opcode::CTEST: return "CTEST";
-        default: return "MAX";
-    }
-}
+namespace HANDLERS {
 
-bool IsClientOpcode(uint16_t opcode) {
-    switch(opcode) {
-        case Opcode::CTEST: return true;
-        default: return false;
-    }
-}
+#define IMPL(name) bool name##(WorldSession* session, WorldPacket& packet)
 
-// TODO debug this
-
-bool HandleOpcode_Test(WorldSession* session, WorldPacket& packet) {
+IMPL(Test) {
     std::optional<uint32_t> sequence;
     packet >> sequence;
 
-    if(!sequence) {
+    if (!sequence) {
         return false;
     }
 
-    spdlog::info("Opcode {} from session id {}. Data: {{ sequence: {} }}", 
-        OpcodeToString(packet.GetOpcode()), 
-        session->GetId(), 
+    spdlog::info("Opcode {} from session id {}. Data: {{ sequence: {} }}",
+        OpcodeUtils::ToString(packet.GetOpcode()),
+        session->GetId(),
         sequence.value()
     );
 
@@ -40,3 +27,7 @@ bool HandleOpcode_Test(WorldSession* session, WorldPacket& packet) {
 
     return true;
 }
+
+#undef IMPL
+
+}; // namespace HANDLERS

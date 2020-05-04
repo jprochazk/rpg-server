@@ -3,8 +3,8 @@
 #include "WorldSession.h"
 #include "core/common/ByteBuffer.h"
 #include "core/network/Websocket.h"
-#include "world/World.h"
-#include "world/Opcode.h"
+#include "World.h"
+#include "Opcode.h"
 
 WorldSession::WorldSession(
     uint16_t id, 
@@ -24,7 +24,7 @@ void WorldSession::Update()
     if(auto p = socket_->weak_from_this().lock()) {
         if(!p->IsBufferEmpty()) {
             auto buf = p->GetBuffer();
-            auto currTime = World::Instance()->GetTimeStamp();
+            auto currTime = sWorld.GetTimeStamp();
             for(size_t i = 0, len = buf.size(); i < len; i++) {
                 WorldPacket pkt(std::move(buf[i]), currTime);
                 if(!pkt.IsValid()) {

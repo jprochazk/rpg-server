@@ -12,7 +12,7 @@ class Websocket;
 
 class World {
 public:
-    static World* Instance();
+    static World& Instance();
     WorldSocketManager* GetSocketManager();
 
     void StartMainLoop(std::atomic<bool>* exitSignal, float updateRate = 30, int maxConsecutiveUpdates = 5);
@@ -36,6 +36,8 @@ private:
     uint16_t sessionIdSequence_;
     std::unordered_map<uint16_t, std::shared_ptr<WorldSession>> sessions_;
 }; // class World
+
+#define sWorld World::Instance()
 
 
 #endif // SERVER_WORLD_WORLD_H

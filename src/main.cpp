@@ -5,7 +5,7 @@
 #include "world/World.h"
 #include "core/Config.h"
 
-#include <pqxx/pqxx>
+#include "core/database/Connection.h"
 
 std::atomic<bool> exitSignal = false;
 void SignalHandler(boost::system::error_code const& error, int signalNum) 
@@ -37,22 +37,14 @@ int main()
 		spdlog::info("Connecting to database postgresql://{}:{}@{}:{}/{}",
 			user, password, host, port, name);
 
-		try {
-			pqxx::connection conn(fmt::format("postgresql://{}:{}@{}:{}/{}",
-				user, password, host, port, name));
-
-			pqxx::work work(conn);
-			auto result = work.exec1("SELECT 1");
-			work.commit();
-
-
-			spdlog::info("Result: {}", result[0].as<int>());
-		}
-		catch (const std::exception& e) {
-			spdlog::error("{}", e.what());
-			exit(EXIT_FAILURE);
+		DB::Connection conn(DB::Settings{ user,password,host,port,name });
+		auto result = conn.Query("SELECT 1");
+		spdlog::info("Query result:");
+		for (auto& row : result) {
+			spdlog::info("Row: {}", row[0].as<int>());
 		}
 
+		return 0;
 	}
 
 	// instantiate world singleton
@@ -72,7 +64,7 @@ int main()
 		std::make_shared<SocketListener>(
 			ioc,
 			tcp::endpoint{ net::ip::make_address(address_str), port },
-			World::Instance()->GetSocketManager()
+			sWorld.GetSocketManager()
 		)->Run();
 
 		// Run the I/O service on the requested number of threads
@@ -84,7 +76,7 @@ int main()
 		delete thread;
 	});
 
-	World::Instance()->StartMainLoop(&exitSignal, 1, 5);
+	sWorld.StartMainLoop(&exitSignal, 1, 5);
 
 	return EXIT_SUCCESS;
 }
