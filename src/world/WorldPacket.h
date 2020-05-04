@@ -4,7 +4,7 @@
 
 #include "pch.h"
 #include "world/Opcode.h"
-#include "common/ByteBuffer.h"
+#include "core/common/ByteBuffer.h"
 #include "world/WorldTime.h"
 
 class WorldPacket : public ByteBuffer {

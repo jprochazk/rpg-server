@@ -1,8 +1,8 @@
 
 #include "pch.h"
 #include "WorldSession.h"
-#include "common/ByteBuffer.h"
-#include "network/Websocket.h"
+#include "core/common/ByteBuffer.h"
+#include "core/network/Websocket.h"
 #include "world/World.h"
 #include "world/Opcode.h"
 

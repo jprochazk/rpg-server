@@ -4,7 +4,7 @@
 #define SERVER_WORLD_WORLD_SESSION_H
 
 #include "pch.h"
-#include "common/ByteBuffer.h"
+#include "core/common/ByteBuffer.h"
 #include "world/WorldPacket.h"
 
 class Websocket;

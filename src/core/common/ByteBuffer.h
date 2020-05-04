@@ -4,7 +4,7 @@
 #define SERVER_COMMON_BYTE_BUFFER_H
 
 #include "pch.h"
-#include "common/ByteConvert.h"
+#include "core/common/ByteConvert.h"
 
 class ByteBuffer {
 public:

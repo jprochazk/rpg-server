@@ -4,8 +4,8 @@
 #define SERVER_NETWORK_WEBSOCKET_H
 
 #include "pch.h"
-#include "common/ByteBuffer.h"
-#include "network/net.h"
+#include "core/common/ByteBuffer.h"
+#include "core/network/net.h"
 
 class SocketManager;
 class Websocket;

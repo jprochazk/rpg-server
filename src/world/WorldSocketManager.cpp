@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "WorldSocketManager.h"
-#include "network/Websocket.h"
+#include "core/network/Websocket.h"
 
 WorldSocketManager::WorldSocketManager()
     : SocketManager()

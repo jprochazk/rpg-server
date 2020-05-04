@@ -5,8 +5,8 @@
 
 #include "pch.h"
 
-#include "network/net.h"
-#include "network/Websocket.h"
+#include "core/network/net.h"
+#include "core/network/Websocket.h"
 
 // Accepts incoming connections and launches the sessions
 class SocketListener : public std::enable_shared_from_this<SocketListener>

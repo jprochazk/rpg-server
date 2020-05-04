@@ -1,7 +1,7 @@
 
 #include "pch.h"
 #include "World.h"
-#include "network/Websocket.h"
+#include "core/network/Websocket.h"
 #include "world/WorldPacket.h"
 #include "world/Opcode.h"
 
