@@ -61,7 +61,6 @@ void SocketListener::Run()
         beast::bind_front_handler(
             &SocketListener::OnAccept,
             shared_from_this()));
-    spdlog::info("Socket listener opened");
 }
 
 // Report a failure
@@ -70,7 +69,7 @@ void SocketListener::Fail(beast::error_code ec, char const* what)
     // Don't report on canceled operations
     if (ec == net::error::operation_aborted)
         return;
-    spdlog::error("{}: {}", what, ec.message());
+    LOG_ERROR("{}: {}", what, ec.message());
 }
 
 // Handle a connection

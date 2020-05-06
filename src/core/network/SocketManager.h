@@ -1,6 +1,6 @@
 
 #pragma once
-#ifndef SERVER_NETWORK_SOCKET_MANAGER_H
+#ifndef SERVER_CORE_NETWORK_SOCKET_MANAGER_H
 
 class Websocket;
 
@@ -13,4 +13,4 @@ public:
 }; // class SocketManager
 
 
-#endif // SERVER_NETWORK_SOCKET_MANAGER_H
+#endif // SERVER_CORE_NETWORK_SOCKET_MANAGER_H

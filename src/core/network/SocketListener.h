@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef SERVER_NETWORK_SOCKET_LISTENER_H
-#define SERVER_NETWORK_SOCKET_LISTENER_H
+#ifndef SERVER_CORE_NETWORK_SOCKET_LISTENER_H
+#define SERVER_CORE_NETWORK_SOCKET_LISTENER_H
 
 #include "pch.h"
 
@@ -28,4 +28,4 @@ private: // members
     SocketManager* socketManager_;
 }; // class SocketListener
 
-#endif // SERVER_NETWORK_SOCKET_LISTENER_H
+#endif // SERVER_CORE_NETWORK_SOCKET_LISTENER_H

@@ -2,28 +2,28 @@
 #include "pch.h"
 #include "Websocket.h"
 #include "SocketManager.h"
+#include "PacketHandler.h"
 
 Websocket::Websocket(
     tcp::socket&& socket,
     SocketManager* socketManager)
     : wsBuffer_()
     , ws_(std::move(socket))
-    , shouldClose_(false)
     , isAsyncWriting_(false)
     , writeBuffer_()
-    , readLock_()
-    , readBuffer_()
     , socketManager_(socketManager)
+    , packetHandler_(nullptr)
 {
 }
 
 Websocket::~Websocket()
 {
-    std::lock_guard<std::mutex> lock(readLock_);
-
     // Remove this session from the list of active sessions
     socketManager_->Remove(this);
-    spdlog::info("Socket closed");
+}
+
+void Websocket::SetPacketHandler(PacketHandler* handler) {
+    packetHandler_ = handler;
 }
 
 void Websocket::Run()
@@ -63,7 +63,11 @@ void Websocket::Close()
 
 void Websocket::OnClose()
 {
-    shouldClose_ = true;
+    net::post(
+        ws_.get_executor(),
+        beast::bind_front_handler(
+            &Websocket::AsyncClose,
+            shared_from_this()));
 }
 
 void Websocket::Fail(beast::error_code ec, char const* what)
@@ -72,7 +76,7 @@ void Websocket::Fail(beast::error_code ec, char const* what)
     if (ec == net::error::operation_aborted || ec == beast::websocket::error::closed)
         return;
 
-    spdlog::error("{}: {}", what, ec.message());
+    LOG_WARN("{}: {}", what, ec.message());
 }
 
 void Websocket::OnAccept(beast::error_code ec)
@@ -83,38 +87,12 @@ void Websocket::OnAccept(beast::error_code ec)
     // Add this session to the list of active sessions
     socketManager_->Add(this);
 
-    spdlog::info("Socket opened");
-
-    if(shouldClose_)
-        return AsyncClose();
-
     // Read a message
     ws_.async_read(
         wsBuffer_,
         beast::bind_front_handler(
             &Websocket::OnRead,
             shared_from_this()));
-}
-
-bool Websocket::IsBufferEmpty() const
-{
-    return readBuffer_.size() == 0;
-}
-
-std::vector<ByteBuffer> Websocket::GetBuffer()
-{
-    std::lock_guard<std::mutex> lock(readLock_);
-
-    // construct output buffer by moving elements from read buffer
-    std::vector<ByteBuffer> buf(
-        // move iterators convert values to rvalues when dereferencing the underlying iterator
-        std::make_move_iterator(readBuffer_.begin()),
-        std::make_move_iterator(readBuffer_.end()));
-    // buffer is in undefined state because elements were moved
-    // clearing it fixes this
-    readBuffer_.clear();
-    
-    return buf;
 }
 
 void Websocket::OnRead(beast::error_code ec, std::size_t read_bytes)
@@ -127,18 +105,17 @@ void Websocket::OnRead(beast::error_code ec, std::size_t read_bytes)
         // or larger than max size
         wsBuffer_.consume(wsBuffer_.size());
     } else {
-        std::lock_guard<std::mutex> lock(readLock_);
-        std::vector<uint8_t> buf(wsBuffer_.size());
+        ByteBuffer buf(wsBuffer_.size());
         boost::asio::buffer_copy(
-            boost::asio::buffer(buf.data(), wsBuffer_.size()),
+            boost::asio::buffer(buf.Data(), wsBuffer_.size()),
             wsBuffer_.data()
         );
-        readBuffer_.push_back(ByteBuffer{std::move(buf)});
         wsBuffer_.consume(wsBuffer_.size());
-    }
 
-    if(shouldClose_)
-        return AsyncClose();
+        if (packetHandler_) {
+            packetHandler_->Handle(std::move(buf));
+        }
+    }
 
     // Read another message
     ws_.async_read(
@@ -148,34 +125,31 @@ void Websocket::OnRead(beast::error_code ec, std::size_t read_bytes)
             shared_from_this()));
 }
 
-void Websocket::Send(const ByteBuffer ss)
+void Websocket::Send(std::vector<uint8_t> ss)
 {
-    // Post our work to the strand, this ensures
-    // that the members of `this` will not be
-    // accessed concurrently.
-
+    // post it to websocket's strand and immediately return
     net::post(
         ws_.get_executor(),
         beast::bind_front_handler(
             &Websocket::OnSend,
             shared_from_this(),
-            ss));
+            std::move(ss)));
 }
 
-void Websocket::OnSend(const ByteBuffer ss)
+void Websocket::OnSend(std::vector<uint8_t>&& ss)
 {
     // Always add to queue
-    writeBuffer_.push_back(ss);
+    writeBuffer_.push_back(std::move(ss));
 
-    // Are we already writing? Is the socket closing?
-    if (isAsyncWriting_ || shouldClose_)
+    // Are we already writing?
+    if (isAsyncWriting_)
         return;
 
     isAsyncWriting_ = true;
 
     // We are not currently writing, so send this immediately
     ws_.async_write(
-        net::buffer(writeBuffer_.front().Contents()),
+        net::buffer(writeBuffer_.front()),
         beast::bind_front_handler(
             &Websocket::OnWrite,
             shared_from_this()));
@@ -187,19 +161,18 @@ void Websocket::OnWrite(beast::error_code ec, std::size_t)
     if (ec)
         return Fail(ec, "write");
 
-    // Remove the string from the queue
+    // Remove packet from the queue
     writeBuffer_.erase(writeBuffer_.begin());
 
     // Stop writing if the queue is empty
-    // or we should close
-    if (writeBuffer_.empty() || shouldClose_) {
+    if (writeBuffer_.empty()) {
         isAsyncWriting_ = false;
         return;
     }
 
     // Write another
     ws_.async_write(
-        net::buffer(writeBuffer_.front().Contents()),
+        net::buffer(writeBuffer_.front()),
         beast::bind_front_handler(
             &Websocket::OnWrite,
             shared_from_this()));

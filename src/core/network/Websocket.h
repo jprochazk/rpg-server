@@ -1,16 +1,16 @@
 
 #pragma once
-#ifndef SERVER_NETWORK_WEBSOCKET_H
-#define SERVER_NETWORK_WEBSOCKET_H
+#ifndef SERVER_CORE_NETWORK_WEBSOCKET_H
+#define SERVER_CORE_NETWORK_WEBSOCKET_H
 
 #include "pch.h"
-#include "core/common/ByteBuffer.h"
 #include "core/network/net.h"
 
-class SocketManager;
-class Websocket;
 
 const uint16_t MAX_PACKET_SIZE = 1024;
+
+class SocketManager;
+class PacketHandler;
 
 /** Represents an active WebSocket connection to the server
 */
@@ -25,32 +25,27 @@ public:
 
     void Run();
     void Close();
-    void Send(const ByteBuffer ss);
-    bool IsBufferEmpty() const;
-    std::vector<ByteBuffer> GetBuffer();
+    void Send(std::vector<uint8_t> ss);
+    void SetPacketHandler(PacketHandler* handler);
 private:
     beast::flat_buffer wsBuffer_;
     beast::websocket::stream<beast::tcp_stream> ws_;
 
-    bool shouldClose_;
-
     bool isAsyncWriting_;
-    std::vector<ByteBuffer> writeBuffer_;
+    std::vector<std::vector<uint8_t>> writeBuffer_;
 
-    std::mutex readLock_;
-    std::vector<ByteBuffer> readBuffer_;
     SocketManager* socketManager_;
-
+    PacketHandler* packetHandler_;
 
     void Fail(beast::error_code ec, char const* what);
     void OnAccept(beast::error_code ec);
     void OnRead(beast::error_code ec, std::size_t bytes_transferred);
     void OnWrite(beast::error_code ec, std::size_t bytes_transferred);
-    void OnSend(const ByteBuffer ss);
+    void OnSend(std::vector<uint8_t>&& ss);
     void OnClose();
 
     void AsyncClose();
     void OnAsyncClose(beast::error_code ec);
 }; // class Websocket
 
-#endif // SERVER_NETWORK_WEBSOCKET_H
+#endif // SERVER_CORE_NETWORK_WEBSOCKET_H
