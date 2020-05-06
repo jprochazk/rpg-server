@@ -15,10 +15,9 @@ public:
 
 	template<class T>
 	static std::optional<T> Get(const std::string& key) {
-		std::lock_guard<std::mutex> lock(accessMutex_);
-
-		auto it = instance_->content_.find(key);
-		if (it != instance_->content_.end()) {
+		auto& content = Instance().content_;
+		auto it = content.find(key);
+		if (it != content.end()) {
 			return it.value();
 		}
 		else {
@@ -35,7 +34,7 @@ public:
 		}
 		else {
 			throw std::runtime_error(
-				fmt::format("Config file \"{}\" has no field \"{}\"", instance_->path_, key));
+				fmt::format("Config file \"{}\" has no field \"{}\"", Instance().path_, key));
 		}
 	}
 
@@ -51,10 +50,8 @@ public:
 	}
 
 private:
-	static std::mutex accessMutex_;
-	static std::unique_ptr<Config> instance_;
-
-	Config(const std::string& path);
+	static Config& Instance();
+	Config() = default;
 
 	std::string path_;
 	json content_;

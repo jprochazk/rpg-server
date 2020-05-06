@@ -2,30 +2,29 @@
 #include "pch.h"
 #include "Config.h"
 
-void Config::Load(const std::string& path) {
-	std::lock_guard<std::mutex> lock(accessMutex_);
-
-	instance_.reset(new Config(path));
+Config& Config::Instance() {
+	static Config instance;
+	return instance;
 }
 
-Config::Config(const std::string& path) {
-	path_ = fs::complete(path).string();
-	LOG_INFO("Loading config file \"{}\"", path_);
+void Config::Load(const std::string& path) {
+	auto& instance = Instance();
 
-	std::ifstream config_file(path_);
+	auto full_path = fs::complete(path).string();
+	LOG_INFO("Loading config file \"{}\"", full_path);
+
+	std::ifstream config_file(full_path);
 	if (config_file.bad()) {
-		LOG_ERROR("Could not open file \"{}\", aborting execution...", path_);
+		LOG_ERROR("Could not open file \"{}\", aborting execution...", full_path);
 		abort();
 	}
 
+	instance.path_ = std::move(full_path);
 	try {
-		content_ = json::parse(config_file);
+		instance.content_ = json::parse(config_file);
 	}
 	catch (json::exception e) {
 		LOG_ERROR("{}", e.what());
 		abort();
 	}
 }
-
-std::mutex Config::accessMutex_;
-std::unique_ptr<Config> Config::instance_(nullptr);
