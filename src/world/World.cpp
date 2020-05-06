@@ -2,8 +2,8 @@
 #include "pch.h"
 #include "World.h"
 #include "core/network/Websocket.h"
-#include "WorldPacket.h"
-#include "Opcode.h"
+#include "network/WorldPacket.h"
+#include "opcode/Opcode.h"
 
 World::World()
     : socketManager_()
@@ -32,8 +32,6 @@ World::World()
             }
         }
     });
-
-    spdlog::info("World initialized");
 }
 
 World::~World()
@@ -95,9 +93,6 @@ void World::Update()
 {
     {
         std::lock_guard<std::mutex> lock(sessionsLock_);
-
-        spdlog::info("Date test {}", GetDate());
-        spdlog::info("Updating {} sessions", sessions_.size());
         for(auto it = sessions_.begin(); it != sessions_.end(); it++) {
             it->second->Update();
         }

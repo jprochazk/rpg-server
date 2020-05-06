@@ -4,9 +4,9 @@
 #define SERVER_WORLD_WORLD_H
 
 #include "pch.h"
-#include "world/WorldSocketManager.h"
-#include "world/WorldSession.h"
-#include "world/WorldTime.h"
+#include "world/network/WorldSocketManager.h"
+#include "world/network/WorldSession.h"
+#include "world/util/WorldTime.h"
 
 class Websocket;
 

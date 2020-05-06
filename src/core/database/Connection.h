@@ -68,7 +68,7 @@ DB::QueryHandle DB::Connection::AsyncExecute(const std::string& name, Args&& ...
 	if (preparedStatements_.find(name) == preparedStatements_.end())
 		throw std::runtime_error(fmt::format("No prepared statement named \"{}\"", name));
 
-	return boost::async(boost::launch::async, [this, name, args...]{
+	return boost::async([this, name, args...]{
 		std::lock_guard<std::mutex> lock(connectionMutex_);
 
 		pqxx::work w(connection_);

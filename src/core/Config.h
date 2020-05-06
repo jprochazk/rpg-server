@@ -1,6 +1,6 @@
 #pragma once
-#ifndef SERVER_COMMON_CONFIG_H
-#define SERVER_COMMON_CONFIG_H
+#ifndef SERVER_CORE_CONFIG_H
+#define SERVER_CORE_CONFIG_H
 
 #include "pch.h"
 #include <nlohmann/json.hpp>
@@ -22,7 +22,7 @@ public:
 			return it.value();
 		}
 		else {
-			spdlog::warn("Config entry \"{}\" is undefined", key);
+			LOG_WARN("Config entry \"{}\" is undefined", key);
 			return {};
 		}
 	}
@@ -65,4 +65,4 @@ public:
 	~Config() = default;
 };
 
-#endif // SERVER_COMMON_CONFIG_H
+#endif // SERVER_CORE_CONFIG_H

@@ -11,7 +11,9 @@
 #endif
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <utility>
 #include <type_traits>
 #include <limits>
@@ -43,5 +45,21 @@
 #include <vector>
 
 #include <spdlog/spdlog.h>
+#define LOG_INFO(format, ...) \
+	spdlog::info(format, __VA_ARGS__);
+#define LOG_WARN(format, ...) \
+	spdlog::warn(format, __VA_ARGS__);
+#define LOG_ERROR(format, ...) \
+	spdlog::error(format, __VA_ARGS__);
+
+#ifdef DEBUG
+#define DEBUG_ASSERT(expr, msg, ...) \
+	if(!(expr)) { \
+		spdlog::error("DEBUG ASSERT FAILURE: {}", msg, __VA_ARGS__); \
+		abort(); \
+	}
+#else
+#define DEBUG_ASSERT(expr, msg, ...) ;
+#endif
 
 #endif // SERVER_PRECOMPILED_HEADER

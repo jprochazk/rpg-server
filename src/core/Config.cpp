@@ -10,11 +10,11 @@ void Config::Load(const std::string& path) {
 
 Config::Config(const std::string& path) {
 	path_ = fs::complete(path).string();
-	spdlog::info("Loading config file \"{}\"", path_);
+	LOG_INFO("Loading config file \"{}\"", path_);
 
 	std::ifstream config_file(path_);
 	if (config_file.bad()) {
-		spdlog::error("Could not open file \"{}\", aborting execution...", path_);
+		LOG_ERROR("Could not open file \"{}\", aborting execution...", path_);
 		abort();
 	}
 
@@ -22,7 +22,7 @@ Config::Config(const std::string& path) {
 		content_ = json::parse(config_file);
 	}
 	catch (json::exception e) {
-		spdlog::error("{}", e.what());
+		LOG_ERROR("{}", e.what());
 		abort();
 	}
 }

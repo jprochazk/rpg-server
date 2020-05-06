@@ -29,7 +29,7 @@ Result Connection::Query(const std::string& query) {
 }
 
 QueryHandle Connection::AsyncQuery(const std::string& query) {
-	return boost::async(boost::launch::async, [query, this] {
+	return boost::async([query, this] {
 		std::lock_guard<std::mutex> lock(connectionMutex_);
 
 		pqxx::work w(connection_);
@@ -44,7 +44,7 @@ void Connection::PrepareStatement(const std::string& name, const std::string& qu
 	std::lock_guard<std::mutex> lock(connectionMutex_);
 
 	if (preparedStatements_.find(name) != preparedStatements_.end()) {
-		spdlog::error("Prepared statement \"{}\" already exists", name);
+		LOG_ERROR("Prepared statement \"{}\" already exists", name);
 		abort();
 	}
 
@@ -53,7 +53,7 @@ void Connection::PrepareStatement(const std::string& name, const std::string& qu
 		preparedStatements_.insert(name);
 	}
 	catch (std::exception e) {
-		spdlog::error("Failed to prepare statement {{ \"{}\": \"{}\" }}, {}", name, query, e.what());
+		LOG_ERROR("Failed to prepare statement {{ \"{}\": \"{}\" }}, {}", name, query, e.what());
 		abort();
 	}
 }
