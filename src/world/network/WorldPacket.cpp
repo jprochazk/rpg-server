@@ -1,8 +1,8 @@
 
 #include "pch.h"
 #include "WorldPacket.h"
-#include "World.h"
-#include "Opcode.h"
+#include "world/World.h"
+#include "world/opcode/Opcode.h"
 
 WorldPacket::WorldPacket(ByteBuffer&& buffer, uint32_t time)
     : ByteBuffer(std::move(buffer))
@@ -11,7 +11,7 @@ WorldPacket::WorldPacket(ByteBuffer&& buffer, uint32_t time)
 {
     std::optional<uint16_t> opt_opcode;
     *this >> opt_opcode;
-    if(opt_opcode && OpcodeUtils::IsClient(opt_opcode.value()))  {
+    if(opt_opcode) {
         opcode_ = opt_opcode.value();
     }
 }

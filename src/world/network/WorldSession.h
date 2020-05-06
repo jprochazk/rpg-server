@@ -4,18 +4,21 @@
 #define SERVER_WORLD_WORLD_SESSION_H
 
 #include "pch.h"
-#include "core/common/ByteBuffer.h"
-#include "world/WorldPacket.h"
+#include "core/network/ByteBuffer.h"
+#include "core/network/PacketHandler.h"
+#include "world/network/WorldPacket.h"
 
 class Websocket;
 class World;
 
-class WorldSession {
+class WorldSession : PacketHandler {
 public:
     WorldSession(uint16_t id, Websocket* socket);
-    ~WorldSession();
+    virtual ~WorldSession() override;
     WorldSession(const WorldSession&) = delete; // no copies
     WorldSession& operator=(const WorldSession&) = delete; // no self-assignments
+
+    virtual void Handle(ByteBuffer&& packet) override;
 
     /// Update the session
     void Update();
@@ -33,6 +36,9 @@ public:
 private:
     uint16_t id_;
     Websocket* socket_;
+
+    std::mutex packetBufferMutex_;
+    std::vector<WorldPacket> packetBuffer_;
 };
 
 #endif // SERVER_WORLD_WORLD_SESSION_H

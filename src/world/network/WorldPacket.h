@@ -3,9 +3,9 @@
 #define SERVER_WORLD_WORLD_PACKET_H
 
 #include "pch.h"
-#include "core/common/ByteBuffer.h"
-#include "world/WorldTime.h"
-#include "Opcode.h"
+#include "core/network/ByteBuffer.h"
+#include "world/util/WorldTime.h"
+#include "world/opcode/Opcode.h"
 
 class WorldPacket : public ByteBuffer {
 public:

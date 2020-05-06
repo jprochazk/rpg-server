@@ -8,7 +8,6 @@ WorldSocketManager::WorldSocketManager()
     , socketAddCallback_(nullptr)
     , socketRemoveCallback_(nullptr)
 {
-    spdlog::info("WorldSocketManager opened");
 }
 
 WorldSocketManager::~WorldSocketManager()
