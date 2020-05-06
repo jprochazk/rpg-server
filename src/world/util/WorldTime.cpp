@@ -16,6 +16,8 @@ std::string WorldTime::ToString(WorldTime::TimePoint t)
         std::chrono::time_point<WorldTime::Clock, WorldTime::Clock::duration>(
             std::chrono::duration_cast<WorldTime::Clock::duration>(t.time_since_epoch())));
 
-    auto ctime = std::string(std::ctime(&time));
-    return ctime.substr(0, ctime.length() - 1);
+    std::ostringstream ss;
+    // iso 8601 date
+    ss << std::put_time(std::localtime(&time), "%F %T %z");
+    return ss.str();
 }
