@@ -6,10 +6,11 @@
 #include "pch.h"
 #include "core/network/ByteBuffer.h"
 #include "core/network/PacketHandler.h"
-#include "world/network/WorldPacket.h"
 
 class Websocket;
 class World;
+class WorldPacket;
+class GameObject;
 
 class WorldSession : PacketHandler {
 public:
@@ -18,7 +19,7 @@ public:
     WorldSession(const WorldSession&) = delete; // no copies
     WorldSession& operator=(const WorldSession&) = delete; // no self-assignments
 
-    virtual void Handle(ByteBuffer&& packet) override;
+    virtual void Handle(std::vector<uint8_t>&& packet) override;
 
     /// Update the session
     void Update();

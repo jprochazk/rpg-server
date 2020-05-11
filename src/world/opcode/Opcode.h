@@ -7,24 +7,18 @@
 
 class WorldSession;
 class WorldPacket;
-class World;
 
 enum Opcode : uint16_t {
-//  OPCODE  N     LAYOUT
-    STEST = 0, // <uint32_t timestamp> <string date>
-    CTEST = 1, // <uint16_t sequence>
-    MAX   = 2  // NULL
+//  OPCODE             LAYOUT
+    CMSG_MOVE,      // <uint8_t input flags>
+    SMSG_UPDATE,    // <uint16_t num entities> [<uint16_t id> <float x> <float y>]
+    MAX             // NULL
 };
 constexpr uint16_t NUM_OPCODES = Opcode::MAX + 1;
 
-/**
- * To add a new opcode: 
- * - Add it to the Opcode enum, increment MAX by one
- * - Register it in OpcodeTable constructor
- */
 class OpcodeTable {
 public:
-    typedef void(*HandlerFn)(WorldSession*, WorldPacket&);
+    typedef void(*HandlerFn)(WorldSession&, WorldPacket&);
 
     class OpcodeHandler {
         friend class OpcodeTable;
@@ -32,7 +26,7 @@ public:
         OpcodeHandler(uint16_t, const char*, bool, HandlerFn);
         ~OpcodeHandler();
         bool IsAsync() const noexcept;
-        void operator()(WorldSession* session, WorldPacket& packet) const;
+        void operator()(WorldSession& session, WorldPacket& packet) const;
     private:
         uint16_t    opcode;
         const char* name;
@@ -40,9 +34,8 @@ public:
         HandlerFn   fn;
     };
 
-    static const OpcodeHandler& GetHandler(uint16_t opcode);
+    static const OpcodeHandler& Get(uint16_t opcode);
     static std::string ToString(uint16_t opcode);
-    static bool IsAsync(uint16_t opcode);
 
     OpcodeTable(OpcodeTable const&) = delete;
     void operator=(OpcodeTable const&) = delete;

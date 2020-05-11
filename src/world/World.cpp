@@ -2,8 +2,9 @@
 #include "pch.h"
 #include "World.h"
 #include "core/network/Websocket.h"
-#include "network/WorldPacket.h"
+#include "network/packet/WorldPacket.h"
 #include "opcode/Opcode.h"
+#include "core/network/stats/NetworkStats.h"
 
 World::World()
     : socketManager_()
@@ -11,22 +12,24 @@ World::World()
     , startTime_()
     , currentTime_()
     , sessionsLock_()
-    , sessionIdSequence_(0)
+    , sessionIdSequence_()
     , sessions_()
+    , lastNetworkMeasure_(std::chrono::steady_clock::now())
 {
     socketManager_.SetOnSocketAdd([&](Websocket* socket) {
+        auto id = sessionIdSequence_.Get();
         std::lock_guard<std::mutex> lock(sessionsLock_);
         sessions_.insert(std::make_pair(
-            sessionIdSequence_, 
-            std::make_shared<WorldSession>(sessionIdSequence_, socket)
+            id,
+            std::make_shared<WorldSession>(id, socket)
         ));
-        sessionIdSequence_++;
     });
 
     socketManager_.SetOnSocketRemove([&](Websocket* socket) {
         std::lock_guard<std::mutex> lock(sessionsLock_);
         for(auto it = sessions_.begin(); it != sessions_.end(); it++) {
-            if(it->second->CheckIdentity(socket)) {
+            auto session = it->second;
+            if(session->CheckIdentity(socket)) {
                 sessions_.erase(it);
                 break;
             }
@@ -94,7 +97,17 @@ void World::Update()
     {
         std::lock_guard<std::mutex> lock(sessionsLock_);
         for(auto it = sessions_.begin(); it != sessions_.end(); it++) {
-            it->second->Update();
+            auto session = it->second;
+            session->Update();
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(
+            now - lastNetworkMeasure_).count() >= 1000) {
+            lastNetworkMeasure_ = now;
+
+            auto measurement = NetworkStats::Measure();
+            spdlog::info(measurement.ToString());
         }
     }
 }

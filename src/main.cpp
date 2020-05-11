@@ -76,7 +76,7 @@ int main()
 	net::io_context ioc;
 	auto networkHandle = StartNetwork(ioc, server_address_str, server_port);
 
-	sWorld.StartMainLoop(&exitSignal, 1, 5);
+	sWorld.StartMainLoop(&exitSignal, 30, 5);
 
 	return EXIT_SUCCESS;
 }

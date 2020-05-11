@@ -58,8 +58,17 @@
 		spdlog::error("DEBUG ASSERT FAILURE: {}", msg, __VA_ARGS__); \
 		abort(); \
 	}
+#define DEBUG_LOG_INFO(format, ...) \
+	spdlog::info(format, __VA_ARGS__);
+#define DEBUG_LOG_WARN(format, ...) \
+	spdlog::warn(format, __VA_ARGS__);
+#define DEBUG_LOG_ERROR(format, ...) \
+	spdlog::error(format, __VA_ARGS__);
 #else
 #define DEBUG_ASSERT(expr, msg, ...) ;
+#define DEBUG_LOG_INFO(format, ...) ;
+#define DEBUG_LOG_WARN(format, ...) ;
+#define DEBUG_LOG_ERROR(format, ...) ;
 #endif
 
 #endif // SERVER_PRECOMPILED_HEADER

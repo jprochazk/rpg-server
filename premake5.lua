@@ -7,7 +7,6 @@ workspace "rpg-server"
 
 	project "server"
 		kind "ConsoleApp"
-		architecture "x86_64"
 		language "C++"
 		cppdialect "C++17"
 
@@ -31,19 +30,11 @@ workspace "rpg-server"
 		-- boost uses templates heavily
 		-- which causes msvc to complain about too many sections in object files
 		filter "system:windows" 
-			buildoptions { 
-				"/bigobj", 
-				"/W4" 
-			}
+			buildoptions { "/bigobj", "/W4" }
 
 		filter "system:linux"
-			buildoptions { 
-				"-Wall", 
-				"-Wextra", 
-				"-Wpedantic"
-			}
-
-
+			buildoptions { "-Wall", "-Wextra", "-Wpedantic" }
+			
 		filter "configurations:Debug"
 			defines { "DEBUG" }
 			runtime "Debug"

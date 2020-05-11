@@ -1,40 +1,33 @@
 #include "pch.h"
 #include "Opcode.h"
 
-#include "world/World.h"
 #include "world/network/WorldSession.h"
-#include "world/network/WorldPacket.h"
+#include "world/network/packet/WorldPacket.h"
+
+/* Handler functions */
+#define HANDLER_FN(opcode, body) \
+	void Handle_##opcode## body ;
+
+HANDLER_FN(CMSG_MOVE, (WorldSession&, WorldPacket&) {
+	// <uint8_t input flags>
+});
+
+#undef HANDLER_FN
+
 
 
 OpcodeTable::OpcodeTable()
 	: handlers_() // default initialize all handler ptrs to nullptr
 {
+#define REGISTER(opcode, async) \
+	RegisterHandler(Opcode::##opcode, #opcode, async, &Handle_##opcode);
 
-#define INIT_NULL_HANDLER(opcode) \
+#define REGISTER_NULL(opcode) \
 	RegisterHandler(Opcode::##opcode, #opcode, true, nullptr);
-#define INIT_HANDLER(opcode, async, fn) \
-	RegisterHandler(Opcode::##opcode, #opcode, async, fn);
 
-	INIT_NULL_HANDLER(STEST);
-	// a handler function can either be a non-capturing lambda or a function pointer
-	// TODO: maybe put handlers in their own functions?
-	INIT_HANDLER(CTEST, false, [](WorldSession* session, WorldPacket& packet) {
-		std::optional<uint32_t> sequence;
-		packet >> sequence;
-
-		if (!sequence) {
-			return;
-		}
-
-		std::string date = sWorld.GetDate();
-		WorldPacket pkt(Opcode::STEST, sWorld.GetTimeStamp());
-		pkt << date;
-
-		session->SendPacket(pkt);
-
-		session->Close();
-	});
-	INIT_NULL_HANDLER(MAX);
+	REGISTER(CMSG_MOVE, true);
+	REGISTER_NULL(SMSG_UPDATE);
+	REGISTER_NULL(MAX);
 
 	// failing to initialize a handler for each opcode is a programmer error
 	for (size_t i = 0; i < NUM_OPCODES; i++) {
@@ -42,8 +35,8 @@ OpcodeTable::OpcodeTable()
 	}
 	LOG_INFO("Opcode table initialized");
 
-#undef INIT_NULL_HANDLER
-#undef INIT_HANDLER
+#undef REGISTER
+#undef REGISTER_NULL
 }
 
 
@@ -61,12 +54,12 @@ bool OpcodeTable::OpcodeHandler::IsAsync() const noexcept
 	return async;
 }
 
-void OpcodeTable::OpcodeHandler::operator()(WorldSession* session, WorldPacket& packet) const 
+void OpcodeTable::OpcodeHandler::operator()(WorldSession& session, WorldPacket& packet) const 
 {
 	if(fn) fn(session, packet);
 }
 
-const OpcodeTable::OpcodeHandler& OpcodeTable::GetHandler(uint16_t opcode) 
+const OpcodeTable::OpcodeHandler& OpcodeTable::Get(uint16_t opcode)
 {
 	if (opcode <= Opcode::MAX) {
 		auto* handler = Instance().handlers_[opcode];
@@ -84,11 +77,14 @@ OpcodeTable::~OpcodeTable() {
 }
 
 std::string OpcodeTable::ToString(uint16_t opcode) {
-	return GetHandler(opcode).name;
-}
-
-bool OpcodeTable::IsAsync(uint16_t opcode) {
-	return GetHandler(opcode).async;
+#define DECLARE_CASE(x) case Opcode::##x##: return #x;
+	switch (opcode) {
+		DECLARE_CASE(CMSG_MOVE);
+		DECLARE_CASE(SMSG_UPDATE);
+		DECLARE_CASE(MAX);
+		default: return "NULL";
+	}
+#undef DECLARE_CASE
 }
 
 OpcodeTable& OpcodeTable::Instance() {

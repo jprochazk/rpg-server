@@ -10,6 +10,7 @@
 class WorldPacket : public ByteBuffer {
 public:
     WorldPacket(ByteBuffer&& buffer, uint32_t time);
+    WorldPacket(std::vector<uint8_t>&& buffer, uint32_t time);
     WorldPacket(uint16_t opcode, uint32_t time);
     ~WorldPacket() = default;
 

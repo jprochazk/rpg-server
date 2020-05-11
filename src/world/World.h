@@ -7,8 +7,12 @@
 #include "world/network/WorldSocketManager.h"
 #include "world/network/WorldSession.h"
 #include "world/util/WorldTime.h"
+#include "core/common/Sequence.h"
+
+using IdSequence = Sequence<uint16_t>;
 
 class Websocket;
+class GameObject;
 
 class World {
 public:
@@ -33,8 +37,10 @@ private:
     WorldTime::TimePoint currentTime_;
     
     std::mutex sessionsLock_;
-    uint16_t sessionIdSequence_;
+    IdSequence sessionIdSequence_;
     std::unordered_map<uint16_t, std::shared_ptr<WorldSession>> sessions_;
+
+    std::chrono::steady_clock::time_point lastNetworkMeasure_;
 }; // class World
 
 #define sWorld World::Instance()

@@ -1,8 +1,9 @@
 
 #include "pch.h"
 #include "Websocket.h"
-#include "SocketManager.h"
-#include "PacketHandler.h"
+#include "core/network/SocketManager.h"
+#include "core/network/PacketHandler.h"
+#include "core/network/stats/NetworkStats.h"
 
 Websocket::Websocket(
     tcp::socket&& socket,
@@ -19,6 +20,7 @@ Websocket::Websocket(
 Websocket::~Websocket()
 {
     // Remove this session from the list of active sessions
+    NetworkStats::Disconnected();
     socketManager_->Remove(this);
 }
 
@@ -85,6 +87,7 @@ void Websocket::OnAccept(beast::error_code ec)
     if (ec) return Fail(ec, "accept");
 
     // Add this session to the list of active sessions
+    NetworkStats::Connected();
     socketManager_->Add(this);
 
     // Read a message
@@ -100,14 +103,16 @@ void Websocket::OnRead(beast::error_code ec, std::size_t read_bytes)
     // Handle the error, if any
     if (ec) return Fail(ec, "read");
 
+    NetworkStats::Read(read_bytes);
+
     if(read_bytes < 2 || read_bytes > MAX_PACKET_SIZE) {
         // don't bother reading messages smaller than 2 bytes (uint16_t opcode) 
         // or larger than max size
         wsBuffer_.consume(wsBuffer_.size());
     } else {
-        ByteBuffer buf(wsBuffer_.size());
+        std::vector<uint8_t> buf(wsBuffer_.size());
         boost::asio::buffer_copy(
-            boost::asio::buffer(buf.Data(), wsBuffer_.size()),
+            boost::asio::buffer(buf.data(), wsBuffer_.size()),
             wsBuffer_.data()
         );
         wsBuffer_.consume(wsBuffer_.size());
@@ -155,11 +160,13 @@ void Websocket::OnSend(std::vector<uint8_t>&& ss)
             shared_from_this()));
 }
 
-void Websocket::OnWrite(beast::error_code ec, std::size_t)
+void Websocket::OnWrite(beast::error_code ec, std::size_t written_bytes)
 {
     // Handle the error, if any
     if (ec)
         return Fail(ec, "write");
+
+    NetworkStats::Sent(written_bytes);
 
     // Remove packet from the queue
     writeBuffer_.erase(writeBuffer_.begin());

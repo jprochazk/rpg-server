@@ -28,7 +28,7 @@ Result Connection::Query(const std::string& query) {
 	return result;
 }
 
-QueryHandle Connection::AsyncQuery(const std::string& query) {
+QueryHandle Connection::QueryAsync(const std::string& query) {
 	return boost::async([query, this] {
 		std::lock_guard<std::mutex> lock(connectionMutex_);
 

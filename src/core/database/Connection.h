@@ -29,13 +29,13 @@ namespace DB
 
 		
 		Result Query(const std::string& query);
-		QueryHandle AsyncQuery(const std::string& query);
+		QueryHandle QueryAsync(const std::string& query);
 
 		template<typename ...Args>
 		Result Execute(const std::string& name, Args&& ...args);
 
 		template<typename ...Args>
-		QueryHandle AsyncExecute(const std::string& name, Args&& ...args);
+		QueryHandle ExecuteAsync(const std::string& name, Args&& ...args);
 
 		void PrepareStatement(const std::string& name, const std::string& query);
 
@@ -64,7 +64,7 @@ DB::Result DB::Connection::Execute(const std::string& name, Args&& ...args) {
 }
 
 template<typename ...Args>
-DB::QueryHandle DB::Connection::AsyncExecute(const std::string& name, Args&& ...args) {
+DB::QueryHandle DB::Connection::ExecuteAsync(const std::string& name, Args&& ...args) {
 	if (preparedStatements_.find(name) == preparedStatements_.end())
 		throw std::runtime_error(fmt::format("No prepared statement named \"{}\"", name));
 

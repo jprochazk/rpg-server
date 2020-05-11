@@ -15,6 +15,17 @@ WorldPacket::WorldPacket(ByteBuffer&& buffer, uint32_t time)
         opcode_ = opt_opcode.value();
     }
 }
+WorldPacket::WorldPacket(std::vector<uint8_t>&& buffer, uint32_t time)
+    : ByteBuffer(std::move(buffer))
+    , opcode_(Opcode::MAX)
+    , time_(time)
+{
+    std::optional<uint16_t> opt_opcode;
+    *this >> opt_opcode;
+    if (opt_opcode) {
+        opcode_ = opt_opcode.value();
+    }
+}
 WorldPacket::WorldPacket(uint16_t opcode, uint32_t time)
     : ByteBuffer()
     , opcode_(opcode)
