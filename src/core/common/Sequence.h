@@ -1,26 +1,34 @@
 #pragma once
-#ifndef SERVER_CORE_SEQUENCE_H
-#define SERVER_CORE_SEQUENCE_H
 
-#include "pch.h"
+#include "common/platform.h"
+#include <type_traits>
+#include <atomic>
 
-template<typename NumberType>
-class Sequence {
-	static_assert(std::is_integral<NumberType>::value, "NumberType must be integral!");
+namespace common {
+
+template<typename T>
+class sequence {
 public:
-	Sequence(
-		NumberType start = static_cast<NumberType>(0), 
-		NumberType increment = static_cast<NumberType>(1)
+	static_assert(std::is_fundamental<T>::value, "Sequence number type must be fundamental!");
+	using number_type = T;
+
+	sequence(
+		number_type start = static_cast<number_type>(0),
+		number_type increment = static_cast<number_type>(1)
 	)	: current_(start), increment_(increment) {}
 
-	NumberType Get() {
+	number_type get() {
 		auto next = current_.load(std::memory_order_acquire);
 		current_.store(current_.load(std::memory_order_acquire) + increment_, std::memory_order_release);
 		return next;
 	}
 
-	std::atomic<NumberType> current_;
-	NumberType increment_;
+	number_type peek() const {
+		return current_.load(std::memory_order_acquire);
+	}
+
+	std::atomic<number_type> current_;
+	number_type increment_;
 };
 
-#endif // SERVER_CORE_SEQUENCE_H
+} // namespace common

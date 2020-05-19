@@ -1,25 +1,26 @@
-#include "pch.h"
-#include "Connection.h"
+
+#include "database/connection.h"
+
+#include <spdlog/spdlog.h>
 
 
-namespace DB {
+namespace database {
 
-Connection::Connection(const Settings& settings)
-// format connection string using options
+connection::connection(const settings& settings)
 	: connection_(fmt::format("postgresql://{}:{}@{}:{}/{}",
 		settings.user, settings.password, settings.host, settings.port, settings.name))
 {
 }
 
-Connection::~Connection() {
-	std::lock_guard<std::mutex> lock(connectionMutex_);
-	for (const auto& s : preparedStatements_) {
+connection::~connection() {
+	std::lock_guard<std::mutex> lock(connection_mutex_);
+	for (const auto& s : prepared_statements_) {
 		connection_.unprepare(s);
 	}
 }
 
-Result Connection::Query(const std::string& query) {
-	std::lock_guard<std::mutex> lock(connectionMutex_);
+result connection::query(const std::string& query) {
+	std::lock_guard<std::mutex> lock(connection_mutex_);
 
 	pqxx::work w(connection_);
 	auto result = w.exec(query);
@@ -28,9 +29,9 @@ Result Connection::Query(const std::string& query) {
 	return result;
 }
 
-QueryHandle Connection::QueryAsync(const std::string& query) {
+query_handle connection::async_query(const std::string& query) {
 	return boost::async([query, this] {
-		std::lock_guard<std::mutex> lock(connectionMutex_);
+		std::lock_guard<std::mutex> lock(connection_mutex_);
 
 		pqxx::work w(connection_);
 		auto result = w.exec(query);
@@ -40,28 +41,28 @@ QueryHandle Connection::QueryAsync(const std::string& query) {
 	});
 }
 
-void Connection::PrepareStatement(const std::string& name, const std::string& query) {
-	std::lock_guard<std::mutex> lock(connectionMutex_);
+void connection::prepare_statement(const std::string& name, const std::string& query) {
+	std::lock_guard<std::mutex> lock(connection_mutex_);
 
-	if (preparedStatements_.find(name) != preparedStatements_.end()) {
-		LOG_ERROR("Prepared statement \"{}\" already exists", name);
+	if (prepared_statements_.find(name) != prepared_statements_.end()) {
+		spdlog::error("Prepared statement \"{}\" already exists", name);
 		abort();
 	}
 
 	try {
 		connection_.prepare(name, query);
-		preparedStatements_.insert(name);
+		prepared_statements_.insert(name);
 	}
 	catch (std::exception e) {
-		LOG_ERROR("Failed to prepare statement {{ \"{}\": \"{}\" }}, {}", name, query, e.what());
+		spdlog::error("Failed to prepare statement {{ \"{}\": \"{}\" }}, {}", name, query, e.what());
 		abort();
 	}
 }
 
-void Connection::UnprepareStatement(const std::string& name) {
-	std::lock_guard<std::mutex> lock(connectionMutex_);
+void connection::unprepare_statement(const std::string& name) {
+	std::lock_guard<std::mutex> lock(connection_mutex_);
 
-	if (preparedStatements_.find(name) != preparedStatements_.end())
+	if (prepared_statements_.find(name) != prepared_statements_.end())
 		return;
 
 	connection_.unprepare(name);
