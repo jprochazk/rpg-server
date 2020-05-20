@@ -96,7 +96,6 @@ void byte_buffer::append(T const* data, size_t size) {
         "ByteBuffer::Append only accepts fundamental types of size 4 bytes and lower"
         );
     if (size == 0) {
-        spdlog::warn("ByteBuffer::Append - appending vector of size 0");
         return;
     }
 

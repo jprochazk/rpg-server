@@ -46,7 +46,7 @@ void session_system::handle_connections(entt::registry& registry) {
     auto num_connections = connection_counter_.load(std::memory_order_acquire);
     // we're not setting to 0, but just subtracting what we got,
     // because another thread may have incremented the counter inbetween these two calls
-    connection_counter_.fetch_add(-num_connections, std::memory_order_release);
+    connection_counter_.fetch_add(-static_cast<int64_t>(num_connections), std::memory_order_release);
 
     if (num_connections == 0)
         return;
@@ -76,7 +76,7 @@ void session_system::handle_connections(entt::registry& registry) {
 
 void session_system::handle_messages(entt::registry& registry) {
     auto num_messages = message_counter_.load(std::memory_order_acquire);
-    message_counter_.fetch_add(-num_messages, std::memory_order_release);
+    message_counter_.fetch_add(-static_cast<int64_t>(num_messages), std::memory_order_release);
 
     if (num_messages == 0)
         return;
@@ -107,7 +107,7 @@ void session_system::handle_messages(entt::registry& registry) {
 
 void session_system::handle_disconnections(entt::registry& registry) {
     auto num_disconnections = disconnection_counter_.load(std::memory_order_acquire);
-    disconnection_counter_.fetch_add(-num_disconnections, std::memory_order_release);
+    disconnection_counter_.fetch_add(-static_cast<int64_t>(num_disconnections), std::memory_order_release);
 
     if (num_disconnections == 0)
         return;

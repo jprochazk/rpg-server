@@ -52,9 +52,9 @@ TEST(endian_test, endian_convert_i32_ref) {
 	EXPECT_EQ(expected, actual);
 }
 TEST(endian_test, endian_convert_f32_ref) {
-	float expected = 1142.31994628906;
+	auto expected = static_cast<float>(1142.31994628906);
 
-	float actual = 0.09890416264534;
+	auto actual = static_cast<float>(0.09890416264534);
 	common::endian_convert(actual);
 
 	EXPECT_EQ(expected, actual);

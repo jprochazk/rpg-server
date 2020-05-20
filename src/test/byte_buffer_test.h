@@ -45,7 +45,7 @@ namespace bbtest {
 		std::optional<uint16_t>	u16;
 		std::optional<uint32_t>	u32;
 		std::optional<float>	f32;
-	};
+	} test_struct_opt;
 	bool operator==(test_struct const& lhs, test_struct const& rhs) {
 		return lhs.i8 == rhs.i8 &&
 			lhs.i16 == rhs.i16 &&
