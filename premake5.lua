@@ -1,3 +1,8 @@
+function file_exists(name)
+   local f=io.open(name,"r")
+   if f~=nil then io.close(f) return true else return false end
+end
+
 newoption {
 	trigger = "build",
 	value = "Build type",
@@ -13,18 +18,16 @@ if not _OPTIONS["build"] then
 end
 
 workspace "rpg-server"
-
-	if _OPTIONS["build"] == debug then 
-		os.execute("conan install . -s build_type=Debug")
+	
+	build_type = "Debug"
+	if _OPTIONS["build"] == "release" then 
+		build_type = "Release"
 	end
+	os.execute("conan install . -s build_type=" .. build_type)
 
 	include("conanbuildinfo.premake.lua")
 
-	if _options["build"] == debug then
-		configurations { "Debug " }
-	else
-		configurations { "Release" }
-	end
+	configurations { build_type }
 	
 	conan_basic_setup()
 	
@@ -33,6 +36,7 @@ workspace "rpg-server"
 		language "C++"
 		cppdialect "C++17"
 		architecture "x86_64"
+		runtime (build_type)
 
 		targetdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 		objdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}/obj")
@@ -55,13 +59,11 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		if _options["build"] == debug then
+		if build_type == "Debug" then
 			defines { "DEBUG" }
-			runtime "Debug"
 			symbols "On"
 		else
 			defines { "NDEBUG" }
-			runtime "Release"
 			optimize "On"
 		end
 
@@ -70,6 +72,7 @@ workspace "rpg-server"
 		language "C++"
 		cppdialect "C++17"
 		architecture "x86_64"
+		runtime (build_type)
 
 		targetdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 		objdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}/obj")
@@ -93,13 +96,11 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		if _options["build"] == debug then
+		if build_type == "Debug" then
 			defines { "DEBUG" }
-			runtime "Debug"
 			symbols "On"
 		else
 			defines { "NDEBUG" }
-			runtime "Release"
 			optimize "On"
 		end
 
@@ -108,6 +109,7 @@ workspace "rpg-server"
 		language "C++"
 		cppdialect "C++17"
 		architecture "x86_64"
+		runtime (build_type)
 
 		targetdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 		objdir ("bin/%{cfg.buildcfg}/%{cfg.system}-%{cfg.architecture}/%{prj.name}/obj")
@@ -131,12 +133,10 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		if _options["build"] == debug then
+		if build_type == "Debug" then
 			defines { "DEBUG" }
-			runtime "Debug"
 			symbols "On"
 		else
 			defines { "NDEBUG" }
-			runtime "Release"
 			optimize "On"
 		end
