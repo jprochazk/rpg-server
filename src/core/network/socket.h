@@ -13,6 +13,8 @@ class socket_handler;
 
 class socket : public std::enable_shared_from_this<socket>, private boost::noncopyable {
 public:
+    static const size_t MAX_MESSAGE_SIZE = 1024;
+
     socket(uint32_t id, tcp::socket&& tcp_socket, std::shared_ptr<socket_handler> socket_handler);
     ~socket();
 

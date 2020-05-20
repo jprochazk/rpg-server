@@ -6,6 +6,7 @@
 #include "byte_buffer_test.h"
 #include "sequence_test.h"
 #include "metrics_test.h"
+#include "network_test.h"
 
 /// TODO: write integration tests for networking code using a lightweight boost.beast client
 

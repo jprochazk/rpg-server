@@ -17,7 +17,7 @@ public:
 
     ~socket_listener() = default;
 
-    void run();
+    void open();
 private:
     void on_accept(beast::error_code ec, tcp::socket socket);
 

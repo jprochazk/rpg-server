@@ -39,8 +39,7 @@ std::string time::to_string(const time::time_point& t)
     ss << std::put_time(const_cast<std::tm*>(&tm_snapshot), "%F %T %z");
     return ss.str();
 #else
-    const size_t size = 1024;
-    char buffer[size];
+    char buffer[32];
     std::strftime(buffer, size, "%F %T %z", &tm_snapshot);
     return buffer;
 #endif

@@ -41,7 +41,7 @@ struct default_socket_handler : public network::socket_handler {
         }
     }
 
-    virtual void on_error(uint32_t id, const char* what, beast::error_code error) override {
+    virtual void on_error(uint32_t id, std::string_view what, beast::error_code error) override {
         if (error == net::error::operation_aborted ||
             error == net::error::connection_aborted ||
             error == beast::websocket::error::closed)
@@ -101,7 +101,7 @@ socket_listener::socket_listener(
     }
 }
 
-void socket_listener::run() {
+void socket_listener::open() {
     acceptor_.async_accept(
         net::make_strand(ioc_),
         beast::bind_front_handler(

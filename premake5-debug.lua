@@ -27,10 +27,10 @@ workspace "rpg-server"
 
 		filter "system:windows" 
 			-- msvc complains about object file size
-			buildoptions { "/bigobj", "/W4" }
+			buildoptions { "/bigobj" }
 
 		filter "system:linux"
-			buildoptions { "-Wall", "-Wextra", "-Wpedantic" }
+			buildoptions { "-Wall", "-Wextra" }
 			
 		filter "configurations:Debug"
 			defines { "DEBUG" }
@@ -60,10 +60,10 @@ workspace "rpg-server"
 		}
 
 		filter "system:windows" 
-			buildoptions { "/bigobj", "/W4" }
+			buildoptions { "/bigobj" }
 
 		filter "system:linux"
-			buildoptions { "-Wall", "-Wextra", "-Wpedantic" }
+			buildoptions { "-Wall", "-Wextra" }
 			
 		filter "configurations:Debug"
 			defines { "DEBUG" }
@@ -93,10 +93,10 @@ workspace "rpg-server"
 		}
 
 		filter "system:windows" 
-			buildoptions { "/bigobj", "/W4" }
+			buildoptions { "/bigobj" }
 
 		filter "system:linux"
-			buildoptions { "-Wall", "-Wextra", "-Wpedantic" }
+			buildoptions { "-Wall", "-Wextra" }
 			
 		filter "configurations:Debug"
 			defines { "DEBUG" }

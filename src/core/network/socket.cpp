@@ -3,6 +3,7 @@
 #include "network/socket.h"
 #include "network/metrics.h"
 #include "network/socket_handler.h"
+#include <functional>
 
 namespace network {
 
@@ -39,6 +40,8 @@ void socket::open()
             std::string(BOOST_BEAST_VERSION_STRING) +
             " websocket-server");
     }));
+
+    ws_.read_message_max(MAX_MESSAGE_SIZE);
 
     ws_.binary(true);
 
@@ -97,18 +100,16 @@ void socket::on_read(beast::error_code ec, std::size_t read_bytes) {
 
     metrics::read(read_bytes);
 
-    if (read_bytes < 2 || read_bytes > 1024) {
-        fbuffer_.consume(read_bytes);
-    }
-    else {
+    // min message size is 2 bytes (sizeof opcode)
+    if (read_bytes > 1) {
         std::vector<uint8_t> buf(read_bytes);
         boost::asio::buffer_copy(
             boost::asio::buffer(buf.data(), read_bytes),
             fbuffer_.data());
-        fbuffer_.consume(read_bytes);
 
         socket_handler_->on_message(id_, std::move(buf));
     }
+    fbuffer_.consume(read_bytes);
 
     ws_.async_read(
         fbuffer_,

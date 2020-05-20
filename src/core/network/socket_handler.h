@@ -22,7 +22,7 @@ public:
 
 	// Called when the socket encounters an error
 	// Sockets that got an error shouldn't be considered close until you receive an `on_close` event from it
-	virtual void on_error(uint32_t id, const char* what, beast::error_code error) = 0;
+	virtual void on_error(uint32_t id, std::string_view what, beast::error_code error) = 0;
 };
 
 } // namespace network
