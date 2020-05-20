@@ -1,7 +1,30 @@
-include("conanbuildinfo.premake.lua")
+newoption {
+	trigger = "build",
+	value = "Build type",
+	description = "Choose which configuration to use",
+	allowed = {
+		{ "debug", "Debug" },
+		{ "release", "Release" }
+	}
+}
+
+if not _OPTIONS["build"] then 
+	_OPTIONS["build"] = "release"
+end
 
 workspace "rpg-server"
-	configurations { "Release" }
+
+	if _OPTIONS["build"] == debug then 
+		os.execute("conan install . -s build_type=Debug")
+	end
+
+	include("conanbuildinfo.premake.lua")
+
+	if _options["build"] == debug then
+		configurations { "Debug " }
+	else
+		configurations { "Release" }
+	end
 	
 	conan_basic_setup()
 	
@@ -32,10 +55,15 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		filter "configurations:Release"
+		if _options["build"] == debug then
+			defines { "DEBUG" }
+			runtime "Debug"
+			symbols "On"
+		else
 			defines { "NDEBUG" }
 			runtime "Release"
 			optimize "On"
+		end
 
 	project "server"
 		kind "ConsoleApp"
@@ -65,10 +93,15 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		filter "configurations:Release"
+		if _options["build"] == debug then
+			defines { "DEBUG" }
+			runtime "Debug"
+			symbols "On"
+		else
 			defines { "NDEBUG" }
 			runtime "Release"
 			optimize "On"
+		end
 
 	project "test"
 		kind "ConsoleApp"
@@ -98,7 +131,12 @@ workspace "rpg-server"
 		filter "system:linux"
 			buildoptions { "-Wall", "-Wextra" }
 
-		filter "configurations:Release"
+		if _options["build"] == debug then
+			defines { "DEBUG" }
+			runtime "Debug"
+			symbols "On"
+		else
 			defines { "NDEBUG" }
 			runtime "Release"
 			optimize "On"
+		end
