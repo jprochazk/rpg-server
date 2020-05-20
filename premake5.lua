@@ -25,6 +25,10 @@ workspace "rpg-server"
 	end
 	os.execute("conan install . -s build_type=" .. build_type)
 
+	if not file_exists("conanbuildinfo.premake.lua") then
+		error("conan install failed");
+	end
+
 	include("conanbuildinfo.premake.lua")
 
 	configurations { build_type }
