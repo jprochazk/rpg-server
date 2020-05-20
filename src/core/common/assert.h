@@ -8,6 +8,6 @@
 		spdlog::error("DEBUG ASSERT FAILURE: {}", msg, __VA_ARGS__); \
 		abort(); \
 	}
-#elif NDEBUG
+#else
 # define DEBUG_ASSERT(expr, format, ...) ;
 #endif
