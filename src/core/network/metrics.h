@@ -5,7 +5,6 @@
 #include <chrono>
 #include <boost/core/noncopyable.hpp>
 
-
 namespace network {
 
 

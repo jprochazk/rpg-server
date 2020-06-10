@@ -1,6 +1,7 @@
 
 #include "game/system/grid.h"
 #include <algorithm>
+#include <cmath>
 
 namespace game { 
 namespace system { 

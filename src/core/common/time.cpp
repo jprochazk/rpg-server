@@ -40,7 +40,7 @@ std::string time::to_string(const time::time_point& t)
     return ss.str();
 #else
     char buffer[32];
-    std::strftime(buffer, size, "%F %T %z", &tm_snapshot);
+    std::strftime(buffer, sizeof(buffer), "%F %T %z", &tm_snapshot);
     return buffer;
 #endif
 }

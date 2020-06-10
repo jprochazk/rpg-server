@@ -49,7 +49,7 @@ public:
 };
 
 constexpr std::string_view to_string(uint16_t opcode) {
-#define CASE(op) case game::packet::client::opcode::##op##: return #op;
+#define CASE(op) case game::packet::client::opcode::op: return #op;
     switch (opcode) {
         CASE(MOVE_INPUT);
         default: return "NULL";
@@ -68,7 +68,7 @@ enum opcode : uint16_t {
 };
 
 constexpr std::string_view to_string(uint16_t opcode) {
-#define CASE(op) case game::packet::server::opcode::##op##: return #op;
+#define CASE(op) case game::packet::server::opcode::op: return #op;
     switch (opcode) {
         CASE(ID);
         CASE(STATE);

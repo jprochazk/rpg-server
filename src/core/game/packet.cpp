@@ -18,7 +18,8 @@ const float player_speed = 10.f;
 void handle_move(world& world, const entt::entity& entity, const std::vector<uint8_t>& packet) {
 	auto& registry = world.get_registry();
 
-	bool ok = VerifyMoveInputBuffer(flatbuffers::Verifier(packet.data(), packet.size()));
+	auto verifier = flatbuffers::Verifier(packet.data(), packet.size());
+	bool ok = VerifyMoveInputBuffer(verifier);
 	if (!ok) return;
 	auto input = GetMoveInput(packet.data());
 

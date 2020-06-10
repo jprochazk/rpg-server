@@ -120,7 +120,8 @@ void session::handle_messages(world& world) {
         for (auto it = start; it != end; it++) {
             auto& [id, buffer] = *it;
 
-            bool ok = VerifyPacketBuffer(flatbuffers::Verifier(buffer.data(), buffer.size()));
+            auto verifier = flatbuffers::Verifier(buffer.data(), buffer.size());
+            bool ok = VerifyPacketBuffer(verifier);
             if (!ok) continue;
 
             auto packet = GetPacket(buffer.data());

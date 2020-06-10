@@ -7,6 +7,7 @@ namespace fs = boost::filesystem;
 #include <boost/core/noncopyable.hpp>
 #include <optional>
 #include <string>
+#include <spdlog/spdlog.h>
 
 namespace util {
 
