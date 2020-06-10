@@ -76,9 +76,13 @@ byte_buffer& byte_buffer::operator<<(std::vector<uint8_t> const& val) {
     append(val.data(), val.size());
     return *this;
 }
+byte_buffer& byte_buffer::operator<<(byte_buffer const& val) {
+    append(val.data(), val.size());
+    return *this;
+}
 byte_buffer& byte_buffer::operator<<(const std::string& val) {
     // writing strings longer than 255 is a programmer error, so it's safe to assert
-    DEBUG_ASSERT(val.length() < static_cast<size_t>(UINT8_MAX), "Attempted to write string longer than UINT8_MAX size!");
+    debug_assert(val.length() < static_cast<size_t>(UINT8_MAX), "Attempted to write string longer than UINT8_MAX size!");
     auto strlen = static_cast<uint8_t>(val.length());
     write(strlen); // write the string length
     append(val.data(), val.size()); // copy the string
@@ -172,8 +176,8 @@ std::vector<uint8_t> byte_buffer::contents() const
     return storage_;
 }
 
-bool byte_buffer::operator==(const byte_buffer& other) {
-    return storage_ == other.storage_;
-}
-
 } // namespace network
+
+bool operator==(const network::byte_buffer& lhs, const network::byte_buffer& rhs) {
+    return lhs.contents() == rhs.contents();
+}

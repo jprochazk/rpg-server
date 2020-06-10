@@ -7,6 +7,8 @@
 #define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 #include <boost/thread/future.hpp>
 
+#include <spdlog/spdlog.h>
+
 namespace database
 {
 
@@ -16,6 +18,10 @@ typedef struct settings {
 	std::string host;
 	uint16_t	port;
 	std::string name;
+
+	std::string to_string() const {
+		return fmt::format("postgresql://{}:{}@{}:{}/{}", user, password, host, port, name);
+	}
 } settings;
 
 using result = pqxx::result;

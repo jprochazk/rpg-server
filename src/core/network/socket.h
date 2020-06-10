@@ -11,17 +11,26 @@ namespace network {
 
 class socket_handler;
 
-class socket : public std::enable_shared_from_this<socket>, private boost::noncopyable {
+class socket_base {
+public:
+    virtual ~socket_base() = default;
+    virtual void open() = 0;
+    virtual void close() = 0;
+    virtual void send(std::vector<uint8_t> data) = 0;
+    virtual bool closed() const = 0;
+};
+
+class socket : public std::enable_shared_from_this<socket>, private boost::noncopyable, public socket_base {
 public:
     static const size_t MAX_MESSAGE_SIZE = 1024;
 
     socket(uint32_t id, tcp::socket&& tcp_socket, std::shared_ptr<socket_handler> socket_handler);
     ~socket();
 
-    void open();
-    void close();
-    void send(std::vector<uint8_t> data);
-    bool closed() const;
+    void open() override;
+    void close() override;
+    void send(std::vector<uint8_t> data) override;
+    bool closed() const override;
 
 private:
     void on_accept(beast::error_code ec);

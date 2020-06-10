@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include "network/metrics.h"
 
-TEST(metrics_test, measurement_change) {
+TEST(metrics, measurement_change) {
 	auto expected = network::metrics::measurement{
 		1, 100, 100, 0
 	};

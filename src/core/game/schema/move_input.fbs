@@ -1,0 +1,9 @@
+
+table MoveInput {
+	up: bool;
+	down: bool;
+	left: bool;
+	right: bool;
+}
+
+root_type MoveInput;

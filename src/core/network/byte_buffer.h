@@ -29,6 +29,7 @@ public:
     byte_buffer& operator<<(float);
     byte_buffer& operator<<(std::vector<uint8_t> const&);
     byte_buffer& operator<<(std::string const&);
+    byte_buffer& operator<<(byte_buffer const&);
 
     byte_buffer& operator>>(std::optional<uint8_t>&);
     byte_buffer& operator>>(std::optional<uint16_t>&);
@@ -48,8 +49,6 @@ public:
     uint8_t* data() noexcept;
     const uint8_t* data() const noexcept;
     std::vector<uint8_t> contents() const;
-
-    bool operator==(const byte_buffer& other);
 private:
     template<typename T>
     void write(T const&);
@@ -168,3 +167,5 @@ std::optional<std::vector<T>> byte_buffer::read(size_t size) {
 }
 
 } // namespace network
+
+bool operator==(const network::byte_buffer& lhs, const network::byte_buffer& rhs);

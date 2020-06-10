@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include "network/byte_buffer.h"
 
-TEST(byte_buffer_test, write_std_string) {
+TEST(byte_buffer, write_std_string) {
 	std::vector<uint8_t> expected = {
 		6, 72, 101, 108, 108, 111, 33
 	};
@@ -15,7 +15,7 @@ TEST(byte_buffer_test, write_std_string) {
 
 	EXPECT_EQ(expected, actual);
 }
-TEST(byte_buffer_test, read_str_string) {
+TEST(byte_buffer, read_str_string) {
 	auto expected = std::string{ "Hello!" };
 
 	network::byte_buffer bb{ std::vector<uint8_t>{ 6, 72, 101, 108, 108, 111, 33 } };
@@ -67,7 +67,7 @@ namespace bbtest {
 
 }
 
-TEST(byte_buffer_test, read_numeric) {
+TEST(byte_buffer, read_numeric) {
 	bbtest::test_struct expected = {
 		-10,
 		-4000,
@@ -111,7 +111,7 @@ TEST(byte_buffer_test, read_numeric) {
 
 	EXPECT_EQ(expected, actual);
 }
-TEST(byte_buffer_test, write_numeric) {
+TEST(byte_buffer, write_numeric) {
 	std::vector<uint8_t> expected = {
 		246,				// i8
 		240, 96,			// i16
@@ -144,7 +144,7 @@ TEST(byte_buffer_test, write_numeric) {
 
 	EXPECT_EQ(expected, actual);
 }
-TEST(byte_buffer_test, append_bytes) {
+TEST(byte_buffer, append_bytes_vec) {
 	std::vector<uint8_t> expected = {
 		0, 0, 0, 1
 	};
@@ -158,4 +158,14 @@ TEST(byte_buffer_test, append_bytes) {
 	auto actual = bb.contents();
 
 	EXPECT_EQ(expected, actual);
+}
+TEST(byte_buffer, append_bytes_buf) {
+	network::byte_buffer expected(std::vector<uint8_t>{ 0, 0, 0, 1 });
+
+	network::byte_buffer actual;
+	actual << static_cast<uint8_t>(0);
+	network::byte_buffer test(std::vector<uint8_t>{ 0, 0, 1 });
+	actual << test;
+
+	EXPECT_EQ(expected.contents(), actual.contents());
 }

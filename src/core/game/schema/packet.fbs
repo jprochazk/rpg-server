@@ -1,0 +1,7 @@
+
+table Packet {
+	opcode: uint16;
+	buffer: [uint8];
+}
+
+root_type Packet;

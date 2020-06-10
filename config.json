@@ -1,6 +1,8 @@
 {
-	"ip": "127.0.0.1",
-	"port": 8001,
+	"server" : {
+		"address": "127.0.0.1:8001",
+		"update_hz": 60
+	},
 
 	"database": {
 		"name": "gserverdb",

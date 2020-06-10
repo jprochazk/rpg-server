@@ -1,0 +1,27 @@
+
+table Position {
+	x: float;
+	y: float;
+}
+
+table Components {
+	position: Position;
+}
+
+enum Action : uint8 {
+	Create = 0,
+	Update,
+	Delete
+}
+
+table Entity {
+	id:uint32;
+	action:Action;
+	components:Components;
+}
+
+table State {
+	entities:[Entity];
+}
+
+root_type State;

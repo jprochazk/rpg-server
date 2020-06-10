@@ -16,9 +16,9 @@ inline void fail(std::string_view what, beast::error_code ec) {
 
 struct default_socket_handler : public network::socket_handler {
     std::mutex socket_mutex;
-    std::map<uint32_t, std::weak_ptr<network::socket>> sockets;
+    std::map<uint32_t, std::weak_ptr<network::socket_base>> sockets;
 
-    virtual void on_open(uint32_t id, std::weak_ptr<network::socket> socket) override {
+    virtual void on_open(uint32_t id, std::weak_ptr<network::socket_base> socket) override {
         std::lock_guard<std::mutex> lock(socket_mutex);
         spdlog::info("Socket ID {} -> opened", id);
         sockets.insert(std::make_pair(id, socket));

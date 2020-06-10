@@ -77,7 +77,7 @@ bool socket::closed() const {
 /* BOOST.BEAST CALLBACKS */
 
 void socket::on_accept(beast::error_code ec) {
-    if (ec) return socket_handler_->on_error(id_, "on_accept", ec);
+    if (ec) return socket_handler_->on_error(id_, "SOCKET::ACCEPT", ec);
 
     metrics::connection();
     socket_handler_->on_open(id_, weak_from_this());
@@ -91,12 +91,12 @@ void socket::on_accept(beast::error_code ec) {
 
 void socket::on_close(beast::error_code ec) {
     closed_.store(true, std::memory_order_release);
-    if (ec) return socket_handler_->on_error(id_, "on_close", ec);
+    if (ec) return socket_handler_->on_error(id_, "SOCKET::CLOSE", ec);
 }
 
 
 void socket::on_read(beast::error_code ec, std::size_t read_bytes) {
-    if (ec) return socket_handler_->on_error(id_, "on_read", ec);
+    if (ec) return socket_handler_->on_error(id_, "SOCKET::READ", ec);
 
     metrics::read(read_bytes);
 
@@ -134,7 +134,7 @@ void socket::on_send(std::vector<uint8_t>&& data) {
 }
 
 void socket::on_write(beast::error_code ec, std::size_t written_bytes) {
-    if (ec) return socket_handler_->on_error(id_, "on_write", ec);
+    if (ec) return socket_handler_->on_error(id_, "SOCKET::WRITE", ec);
 
     metrics::written(written_bytes);
 

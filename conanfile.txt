@@ -7,6 +7,7 @@ spdlog/1.5.0
 gtest/1.10.0
 concurrentqueue/1.0.1
 entt/3.4.0
+flatbuffers/1.12.0
 
 [options]
 spdlog:header_only=True

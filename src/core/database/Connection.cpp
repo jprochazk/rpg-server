@@ -7,8 +7,7 @@
 namespace database {
 
 connection::connection(const settings& settings)
-	: connection_(fmt::format("postgresql://{}:{}@{}:{}/{}",
-		settings.user, settings.password, settings.host, settings.port, settings.name))
+	: connection_(settings.to_string())
 {
 }
 

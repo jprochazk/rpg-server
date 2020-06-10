@@ -1,13 +1,20 @@
 #pragma once
-
-
-#ifdef DEBUG
 # include <spdlog/spdlog.h>
-# define DEBUG_ASSERT(expr, msg, ...) \
-	if(!(expr)) { \
-		spdlog::error("DEBUG ASSERT FAILURE: {}", msg, __VA_ARGS__); \
-		abort(); \
+# include <stdexcept>
+
+template<typename... Args>
+inline std::runtime_error build_exception(std::string_view format, Args&&... args) {
+	return std::runtime_error(fmt::format(format, args...));
+}
+
+#ifndef NDEBUG
+template<typename... Args>
+inline void debug_assert(bool expr, std::string_view format, Args&&... args) {
+	if (!(expr)) {
+		throw build_exception(format, args...);
 	}
+}
 #else
-# define DEBUG_ASSERT(expr, format, ...) ;
+template<typename... Args>
+inline void debug_assert(bool expr, std::string_view format, Args&&... args) {}
 #endif

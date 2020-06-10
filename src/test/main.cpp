@@ -7,8 +7,11 @@
 #include "sequence_test.h"
 #include "metrics_test.h"
 #include "network_test.h"
-
-/// TODO: write integration tests for networking code using a lightweight boost.beast client
+#include "packet_handler_test.h"
+#include "world_test.h"
+#include "grid_test.h"
+#include "session_test.h"
+#include "sync_test.h"
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);

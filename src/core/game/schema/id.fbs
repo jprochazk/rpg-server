@@ -1,0 +1,6 @@
+
+table Id {
+	value:uint32;
+}
+
+root_type Id;

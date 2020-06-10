@@ -12,7 +12,7 @@ public:
 	virtual ~socket_handler() = default;
 
 	// Called when a socket is fully opened
-	virtual void on_open(uint32_t id, std::weak_ptr<socket> socket) = 0;
+	virtual void on_open(uint32_t id, std::weak_ptr<socket_base> socket) = 0;
 
 	// Called when a socket is fully closed
 	virtual void on_close(uint32_t id) = 0;
