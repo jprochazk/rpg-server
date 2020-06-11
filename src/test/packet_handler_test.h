@@ -21,6 +21,10 @@ TEST(packet_handler_test, move_input) {
 	auto handler = table.get(client::opcode::MOVE_INPUT);
 
 	auto vel_case = [&](uint8_t input, float e_x, float e_y) {
+		// TEMP - big bad HARDcoded values
+		e_x = e_x * 10;
+		e_y = e_y * 10;
+
 		flatbuffers::FlatBufferBuilder builder;
 		auto move_input = CreateMoveInput(builder,
 			(input & 1) == 1,

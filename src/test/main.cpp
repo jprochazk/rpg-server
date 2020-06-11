@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include "endian_test.h"
-#include "byte_buffer_test.h"
 #include "sequence_test.h"
 #include "metrics_test.h"
 #include "network_test.h"

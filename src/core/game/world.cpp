@@ -16,16 +16,19 @@ void world::remove_system(const std::string& name) {
 }
 
 void world::update() {
+	spdlog::info("world update");
 	for (auto& [_, system] : systems) {
 		system->update(*this);
 	}
+
+	registry.commit();
 }
 
-entt::registry& world::get_registry() {
+world::registry_type& world::get_registry() {
 	return registry;
 }
 
-entt::registry const& world::get_registry() const {
+world::registry_type const& world::get_registry() const {
 	return registry;
 }
 

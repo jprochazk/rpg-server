@@ -19,9 +19,34 @@ namespace game {
 class system_base;
 
 class world {
-	entt::registry registry;
-	tsl::ordered_map<std::string, std::shared_ptr<system_base>> systems;
+public:
+	template<typename Entity>
+	class registry : public entt::basic_registry<Entity> {
+		friend class world;
+		using super = entt::basic_registry<Entity>;
 
+		std::vector<entity_type> destroy_queue_;
+
+		void commit() {
+			super::destroy(destroy_queue_.begin(), destroy_queue_.end());
+			destroy_queue_.clear();
+		}
+	public:
+		void destroy(const entity_type entity) {
+			destroy_queue_.push_back(entity);
+		}
+
+		void destroy(const entity_type entity, const version_type version) {
+			destroy_queue_.push_back(entity);
+		}
+
+		template<typename It>
+		void destroy(It first, It last) {
+			std::copy(first, last, std::back_inserter(destroy_queue_));
+		}
+	};
+
+	using registry_type = registry<entt::entity>;
 public:
 	void add_system(const std::string& name, std::shared_ptr<system_base> system);
 
@@ -43,8 +68,11 @@ public:
 
 	void remove_system(const std::string& name);
 	void update();
-	entt::registry& get_registry();
-	entt::registry const& get_registry() const;
+	registry_type& get_registry();
+	registry_type const& get_registry() const;
+private:
+	registry_type registry;
+	tsl::ordered_map<std::string, std::shared_ptr<system_base>> systems;
 };
 
 } // namespace game

@@ -66,14 +66,14 @@ TEST(session, connection) {
 	// we should have also received a packet
 	EXPECT_EQ(socket->messages.size(), static_cast<size_t>(1));
 	auto& message = socket->messages.front();
-	bool packet_ok = network::VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
+	bool packet_ok = VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
 	EXPECT_TRUE(packet_ok);
-	auto packet = network::GetPacket(message.data());
+	auto packet = GetPacket(message.data());
 	EXPECT_EQ(packet->opcode(), static_cast<uint16_t>(packet::server::opcode::ID));
 
-	bool id_ok = game::VerifyIdBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
+	bool id_ok = VerifyIdBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
 	EXPECT_TRUE(id_ok);
-	auto id = game::GetId(packet->buffer()->data());
+	auto id = GetId(packet->buffer()->data());
 
 	EXPECT_EQ(id->value(), static_cast<uint32_t>(0));
 }
@@ -113,7 +113,7 @@ TEST(session, message) {
 	system->on_open(0, socket->weak_from_this());
 	flatbuffers::FlatBufferBuilder builder{ 4 };
 	std::vector<uint8_t> vec{ 2 };
-	auto pkt = network::CreatePacket(builder, packet::server::opcode::MAX, builder.CreateVector(vec.data(), vec.size()));
+	auto pkt = CreatePacket(builder, packet::server::opcode::MAX, builder.CreateVector(vec.data(), vec.size()));
 	builder.Finish(pkt);
 	system->on_message(0, to_vec(builder));
 

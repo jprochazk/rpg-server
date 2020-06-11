@@ -47,19 +47,19 @@ TEST(sync, created) {
 	// socket should've received one packet
 	EXPECT_EQ(socket->messages.size(), static_cast<size_t>(1));
 	auto& message = socket->messages.front();
-	bool packet_ok = network::VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
+	bool packet_ok = VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
 	EXPECT_TRUE(packet_ok);
-	auto packet = network::GetPacket(message.data());
+	auto packet = GetPacket(message.data());
 	EXPECT_EQ(packet->opcode(), static_cast<uint16_t>(packet::server::opcode::STATE));
 
-	bool state_ok = game::VerifyStateBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
+	bool state_ok = VerifyStateBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
 	EXPECT_TRUE(state_ok);
-	auto state = game::GetState(packet->buffer()->data());
+	auto state = GetState(packet->buffer()->data());
 
 	EXPECT_EQ(state->entities()->size(), static_cast<uint32_t>(1));
 	auto received_entity = state->entities()->Get(0);
 	EXPECT_EQ(received_entity->id(), static_cast<uint32_t>(0));
-	EXPECT_EQ(received_entity->action(), game::Action_Create);
+	EXPECT_EQ(received_entity->action(), Action::Create);
 	EXPECT_EQ(received_entity->components()->position()->x(), 0.f);
 	EXPECT_EQ(received_entity->components()->position()->y(), 0.f);
 }
@@ -88,19 +88,19 @@ TEST(sync, updated) {
 
 	EXPECT_EQ(socket->messages.size(), static_cast<size_t>(1));
 	auto& message = socket->messages.front();
-	bool packet_ok = network::VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
+	bool packet_ok = VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
 	EXPECT_TRUE(packet_ok);
-	auto packet = network::GetPacket(message.data());
+	auto packet = GetPacket(message.data());
 	EXPECT_EQ(packet->opcode(), static_cast<uint16_t>(packet::server::opcode::STATE));
 
-	bool state_ok = game::VerifyStateBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
+	bool state_ok = VerifyStateBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
 	EXPECT_TRUE(state_ok);
-	auto state = game::GetState(packet->buffer()->data());
+	auto state = GetState(packet->buffer()->data());
 
 	EXPECT_EQ(state->entities()->size(), static_cast<uint32_t>(1));
 	auto received_entity = state->entities()->Get(0);
 	EXPECT_EQ(received_entity->id(), static_cast<uint32_t>(0));
-	EXPECT_EQ(received_entity->action(), game::Action_Update);
+	EXPECT_EQ(received_entity->action(), Action::Update);
 	EXPECT_EQ(received_entity->components()->position()->x(), 10.f);
 	EXPECT_EQ(received_entity->components()->position()->y(), 0.f);
 }
@@ -130,25 +130,32 @@ TEST(sync, deleted) {
 
 	world.update();
 
+	socket->messages.clear();
+	world.update();
+
 	EXPECT_EQ(socket->messages.size(), static_cast<size_t>(1));
 	auto& message = socket->messages.front();
-	bool packet_ok = network::VerifyPacketBuffer(flatbuffers::Verifier(message.data(), message.size()));
+
+	auto verifier = flatbuffers::Verifier(message.data(), message.size());
+	bool packet_ok = VerifyPacketBuffer(verifier);
 	EXPECT_TRUE(packet_ok);
-	auto packet = network::GetPacket(message.data());
+	auto packet = GetPacket(message.data());
+
 	EXPECT_EQ(packet->opcode(), static_cast<uint16_t>(packet::server::opcode::STATE));
 
-	bool state_ok = game::VerifyStateBuffer(flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size()));
+	verifier = flatbuffers::Verifier(packet->buffer()->data(), packet->buffer()->size());
+	bool state_ok = VerifyStateBuffer(verifier);
 	EXPECT_TRUE(state_ok);
-	auto state = game::GetState(packet->buffer()->data());
+	auto state = GetState(packet->buffer()->data());
 
 	EXPECT_EQ(state->entities()->size(), static_cast<uint32_t>(2));
 	auto received_sentity = state->entities()->Get(0);
 	EXPECT_EQ(received_sentity->id(), static_cast<uint32_t>(0));
-	EXPECT_EQ(received_sentity->action(), game::Action_Update);
+	EXPECT_EQ(received_sentity->action(), Action::Update);
 	EXPECT_EQ(received_sentity->components()->position()->x(), 0.f);
 	EXPECT_EQ(received_sentity->components()->position()->y(), 0.f);
 
 	auto received_entity = state->entities()->Get(1);
 	EXPECT_EQ(received_entity->id(), static_cast<uint32_t>(1));
-	EXPECT_EQ(received_entity->action(), game::Action_Delete);
+	EXPECT_EQ(received_entity->action(), Action::Delete);
 }
